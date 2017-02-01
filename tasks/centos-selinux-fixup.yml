@@ -1,0 +1,18 @@
+---
+- name: Install selinux tools§
+  package:
+    name: setroubleshoot-server
+    state: present
+
+- name: Generate the policy
+  shell: ausearch -c 'mysqld_safe_hel' --raw | audit2allow -M my-mysqldsafehel
+  args:
+    chdir: /tmp
+
+- name: Apply the policy
+  command: semodule -i /tmp/my-mysqldsafehel.pp
+
+- name: Try to start mysql again
+  service:
+    name: mysql
+    state: started
