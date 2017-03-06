@@ -16,3 +16,18 @@
   service:
     name: mysql
     state: started
+  ignore_errors: true # this task will fail, but lets us generate a policy below
+
+# We need to generate two policies ... this is the lazy way
+- name: Generate the second policy
+  shell: ausearch -c 'mysqld_safe_hel' --raw | audit2allow -M my-mysqldsafehel2
+  args:
+    chdir: /tmp
+
+- name: Apply the policy
+  command: semodule -i /tmp/my-mysqldsafehel2.pp
+
+- name: Try to start mysql again
+  service:
+    name: mysql
+    state: started
